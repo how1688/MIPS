@@ -76,7 +76,8 @@ class CPU:
             elif self.EX_MEM["opcode"] == "sw":
                 address = self.EX_MEM["address"]
                 address = int(address/4)
-                self.memory[address] = self.registers[address]
+                print(address, self.registers[self.EX_MEM["destination"]])
+                self.memory[address] = self.registers[self.EX_MEM["destination"]]
 
             log_entry.append(f"{self.EX_MEM['opcode']} MEM Branch={self.EX_MEM['control'].get('Branch', 'X')} MemRead={self.EX_MEM['control'].get('MemRead', 'X')} MemWrite={self.EX_MEM['control'].get('MemWrite', 'X')} RegWrite={self.EX_MEM['control'].get('RegWrite', 'X')} MemToReg={self.EX_MEM['control'].get('MemToReg', 'X')}")
 
@@ -113,7 +114,7 @@ class CPU:
         self.IF_ID = next_instr
 
     def print_results(self):
-        with open("C:\\Users\\user\\Downloads\\SampleProject (1)\\SampleProject\\inputs\\test1_output.txt", "w") as f:
+        with open("C:\\Users\\user\\Downloads\\SampleProject (1)\\SampleProject\\inputs\\test2_output.txt", "w") as f:
             f.write("# Example 1 Case\n")
             f.write("\n## Each clocks\n")
             for log in self.pipeline_log:
@@ -209,7 +210,7 @@ if __name__ == "__main__":
     cpu = CPU()
 
     # 從檔案讀取指令
-    input_file = "C:\\Users\\user\\Downloads\\SampleProject (1)\\SampleProject\\inputs\\test1.txt"
+    input_file = "C:\\Users\\user\\Downloads\\SampleProject (1)\\SampleProject\\inputs\\test2.txt"
     with open(input_file, "r") as f:
         instructions = [parse_instruction(line.strip()) for line in f if line.strip() and not line.startswith("#")]
 
