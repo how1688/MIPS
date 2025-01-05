@@ -1,0 +1,37 @@
+# Example 1 Case
+## Each clocks
+Clock Cycle 1:
+lw IF
+Clock Cycle 2:
+lw ID
+Clock Cycle 2:
+lw IF
+Clock Cycle 3:
+lw EX RegDst=X ALUSrc=X Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+Clock Cycle 3:
+lw ID
+Clock Cycle 3:
+add IF
+Clock Cycle 4:
+lw MEM Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+Clock Cycle 4:
+lw EX RegDst=X ALUSrc=X Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+Clock Cycle 4:
+add ID
+Clock Cycle 4:
+sw IF
+Clock Cycle 5:
+lw WB RegWrite=X MemToReg=X
+Clock Cycle 5:
+lw MEM Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+Clock Cycle 5:
+add EX RegDst=X ALUSrc=X Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+Clock Cycle 5:
+sw ID
+
+## Final Result:
+Total Cycles: 14
+Final Register Values:
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Final Memory Values:
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
