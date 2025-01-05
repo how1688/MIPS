@@ -15,28 +15,23 @@ class CPU:
         self.EX_MEM = None
         self.MEM_WB = None
 
-        # 控制信號模板
-        self.control_signals = {
-            "RegDst": "X",
-            "ALUSrc": "X",
-            "Branch": "X",
-            "MemRead": "X",
-            "MemWrite": "X",
-            "RegWrite": "X",
-            "MemToReg": "X",
-        }
-
     def load_instructions(self, instructions):
+        """
+        載入指令。
+        """
         self.instructions = instructions
 
     def detect_hazard(self):
         """
-        檢測資料冒險，設置停滯信號。
+        檢測資料冒險或條件。
         """
-        if self.ID_EX and self.ID_EX.get("opcode") == "LW":
-            dest = self.ID_EX.get("destination")
-            if self.IF_ID and dest in [self.IF_ID.get("source1"), self.IF_ID.get("source2")]:
-                return True
+        # 如果 `add` 或 `sub` 尚未完成 MEM 階段，阻止 `beq` 进入 EX。
+        if self.EX_MEM and self.EX_MEM.get("opcode") in ["add", "sub"]:
+            dest = self.EX_MEM.get("destination")
+            if self.IF_ID and self.IF_ID.get("opcode") == "beq":
+                # 如果 beq 依赖 add 或 sub 的结果，返回 True 表示需要 stall
+                if dest in [self.IF_ID.get("source1"), self.IF_ID.get("source2")]:
+                    return True
         return False
 
     def fetch_next_instruction(self):
@@ -49,9 +44,6 @@ class CPU:
             return instruction
         return None
 
-    def format_control_signals(self, signals):
-        return " ".join([f"{key}={value}" for key, value in signals.items()])
-
     def execute_cycle(self, cycle):
         """
         執行單個時鐘周期。
@@ -62,24 +54,27 @@ class CPU:
         if self.MEM_WB:
             if self.MEM_WB["opcode"] == "add":
                 self.registers[self.MEM_WB["destination"]] = self.MEM_WB["value"]
+            elif self.MEM_WB["opcode"] == "sub":
+                self.registers[self.MEM_WB["destination"]] = self.MEM_WB["value"]
             elif self.MEM_WB["opcode"] == "lw":
                 self.registers[self.MEM_WB["destination"]] = self.MEM_WB["value"]
 
-            log_entry.append(f"{self.MEM_WB['opcode']} WB RegWrite={self.MEM_WB['control'].get('RegWrite', 'X')} MemToReg={self.MEM_WB['control'].get('MemToReg', 'X')}")
+            log_entry.append(f"WB: {self.MEM_WB['opcode']} RegWrite={self.MEM_WB.get('control', {}).get('RegWrite', 'X')}")
 
         # Memory Access (MEM)
         if self.EX_MEM:
             if self.EX_MEM["opcode"] == "lw":
                 address = self.EX_MEM["address"]
-                value = self.memory[address]
+                value = self.memory[address // 4]
                 self.EX_MEM["value"] = value
             elif self.EX_MEM["opcode"] == "sw":
                 address = self.EX_MEM["address"]
-                address = int(address/4)
-                print(address, self.registers[self.EX_MEM["destination"]])
-                self.memory[address] = self.registers[self.EX_MEM["destination"]]
+                self.memory[address // 4] = self.registers[self.EX_MEM["destination"]]
+            elif self.EX_MEM["opcode"] in ["add", "sub"]:
+                # `add` 和 `sub` 不需要訪問記憶體，只更新 value
+                pass
 
-            log_entry.append(f"{self.EX_MEM['opcode']} MEM Branch={self.EX_MEM['control'].get('Branch', 'X')} MemRead={self.EX_MEM['control'].get('MemRead', 'X')} MemWrite={self.EX_MEM['control'].get('MemWrite', 'X')} RegWrite={self.EX_MEM['control'].get('RegWrite', 'X')} MemToReg={self.EX_MEM['control'].get('MemToReg', 'X')}")
+            log_entry.append(f"MEM: {self.EX_MEM['opcode']}")
 
         # Execute (EX)
         if self.ID_EX:
@@ -87,23 +82,39 @@ class CPU:
                 source1 = self.registers[self.ID_EX["source1"]]
                 source2 = self.registers[self.ID_EX["source2"]]
                 self.ID_EX["value"] = source1 + source2
+            elif self.ID_EX["opcode"] == "sub":
+                source1 = self.registers[self.ID_EX["source1"]]
+                source2 = self.registers[self.ID_EX["source2"]]
+                self.ID_EX["value"] = source1 - source2
             elif self.ID_EX["opcode"] in ["lw", "sw"]:
                 base = self.registers[self.ID_EX["base"]]
                 offset = self.ID_EX["offset"]
                 self.ID_EX["address"] = base + offset
-
-            log_entry.append(f"{self.ID_EX['opcode']} EX RegDst={self.ID_EX['control'].get('RegDst', 'X')} ALUSrc={self.ID_EX['control'].get('ALUSrc', 'X')} Branch={self.ID_EX['control'].get('Branch', 'X')} MemRead={self.ID_EX['control'].get('MemRead', 'X')} MemWrite={self.ID_EX['control'].get('MemWrite', 'X')} RegWrite={self.ID_EX['control'].get('RegWrite', 'X')} MemToReg={self.ID_EX['control'].get('MemToReg', 'X')}")
+            elif self.ID_EX["opcode"] == "beq":
+                source1 = self.registers[self.ID_EX["source1"]]
+                source2 = self.registers[self.ID_EX["source2"]]
+                if source1 == source2:
+                    # 設置分支目標地址
+                    self.pc += self.ID_EX["offset"]
+                    self.IF_ID = None  # 清空 IF/ID 暫存器，停止抓取新指令
+            log_entry.append(f"EX: {self.ID_EX['opcode']}")
 
         # Instruction Decode (ID)
         if self.IF_ID:
-            log_entry.append(f"{self.IF_ID['opcode']} ID")
+            # 如果 `beq` 等待 `add` 或 `sub` 完成，則停止進入 EX 階段
+            if self.IF_ID["opcode"] == "beq" and self.detect_hazard():
+                log_entry.append("Stall: beq waiting for add/sub to finish")
+            else:
+                log_entry.append(f"ID: {self.IF_ID['opcode']}")
 
         # Instruction Fetch (IF)
         next_instr = None
         if not self.detect_hazard():
             next_instr = self.fetch_next_instruction()
             if next_instr:
-                log_entry.append(f"{next_instr['opcode']} IF")
+                log_entry.append(f"IF: {next_instr['opcode']}")
+        else:
+            log_entry.append("Stall: Data Hazard Detected")
 
         self.pipeline_log.append("\n".join(log_entry))
 
@@ -113,14 +124,16 @@ class CPU:
         self.ID_EX = self.IF_ID
         self.IF_ID = next_instr
 
-    def print_results(self):
-        with open("C:\\Users\\user\\Downloads\\SampleProject (1)\\SampleProject\\inputs\\test2_output.txt", "w") as f:
-            f.write("# Example 1 Case\n")
-            f.write("\n## Each clocks\n")
+    def print_results(self, output_file):
+        """
+        輸出結果到檔案。
+        """
+        with open(output_file, "w") as f:
+            f.write("# Execution Log\n")
             for log in self.pipeline_log:
                 f.write(log + "\n\n")
 
-            f.write("\n## Final Result:\n")
+            f.write("## Final Results:\n")
             f.write(f"Total Cycles: {len(self.pipeline_log)}\n")
             f.write("\nFinal Register Values:\n")
             f.write(" ".join(map(str, self.registers)) + "\n")
@@ -205,18 +218,22 @@ def parse_instruction(line):
         raise ValueError(f"Unsupported opcode: {opcode}")
 
 
-
 if __name__ == "__main__":
     cpu = CPU()
 
-    # 從檔案讀取指令
-    input_file = "C:\\Users\\user\\Downloads\\SampleProject (1)\\SampleProject\\inputs\\test2.txt"
+    # 指令檔案路徑
+    input_file = "C:\\Users\\user\\Downloads\\SampleProject (1)\\SampleProject\\inputs\\test4.txt"
+    output_file = "C:\\Users\\user\\Downloads\\SampleProject (1)\\SampleProject\\inputs\\test4_output.txt"
+    # 讀取指令
     with open(input_file, "r") as f:
-        instructions = [parse_instruction(line.strip()) for line in f if line.strip() and not line.startswith("#")]
+        instructions = [parse_instruction(line.strip()) for line in f if line.strip()]
 
+    # 載入指令並執行
     cpu.load_instructions(instructions)
     cycle = 1
     while cpu.pc < len(cpu.instructions) or any([cpu.IF_ID, cpu.ID_EX, cpu.EX_MEM, cpu.MEM_WB]):
         cpu.execute_cycle(cycle)
         cycle += 1
-    cpu.print_results()
+
+    # 輸出結果
+    cpu.print_results(output_file)
