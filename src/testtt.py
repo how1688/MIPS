@@ -75,7 +75,7 @@ class CPU:
                 self.EX_MEM["value"] = value
             elif self.EX_MEM["opcode"] == "sw":
                 address = self.EX_MEM["address"]
-                self.memory[address] = self.registers[self.EX_MEM["source"]]
+                self.memory[address] = self.registers[self.EX_MEM["source1"]]
 
             log_entry.append(f"{self.EX_MEM['opcode']} MEM Branch={self.EX_MEM['control'].get('Branch', 'X')} MemRead={self.EX_MEM['control'].get('MemRead', 'X')} MemWrite={self.EX_MEM['control'].get('MemWrite', 'X')} RegWrite={self.EX_MEM['control'].get('RegWrite', 'X')} MemToReg={self.EX_MEM['control'].get('MemToReg', 'X')}")
 
@@ -112,7 +112,7 @@ class CPU:
         self.IF_ID = next_instr
 
     def print_results(self):
-        with open("C:\\Users\\user\\Documents\\GitHub\\MIPS\\outputs\\test1_output.txt", "w") as f:
+        with open("C:\\Users\\user\\Downloads\\SampleProject (1)\\SampleProject\\inputs\\test1_output.txt", "w") as f:
             f.write("# Example 1 Case\n")
             f.write("\n## Each clocks\n")
             for log in self.pipeline_log:
@@ -130,8 +130,8 @@ def parse_instruction(line):
     parts = line.split()
     opcode = parts[0]
     operands = parts[1:] if len(parts) > 1 else []
-    
-    if opcode in ["LW", "SW"]:
+    operands = [op.replace(",", "") for op in operands]
+    if opcode in ["lw", "sw"]:
         # 解析 LW/SW 的操作數，例如 "8($0)"
         offset, base = operands[1].split('(')
         offset = int(offset)
@@ -154,7 +154,7 @@ def parse_instruction(line):
             "base": base,  # 基址寄存器
             "offset": offset,  # 偏移量
         }
-    elif opcode in ["ADD", "SUB"]:
+    elif opcode in ["add", "sub"]:
         # 解析算術指令，例如 "ADD $1, $2, $3"
         rd = int(operands[0].replace("$", "").replace(",", ""))
         rs = int(operands[1].replace("$", "").replace(",", ""))
@@ -175,7 +175,7 @@ def parse_instruction(line):
             "source2": rt,
             "destination": rd,
         }
-    elif opcode == "BEQ":
+    elif opcode == "beq":
         # 解析分支指令，例如 "BEQ $1, $2, 10"
         rs = int(operands[0].replace("$", "").replace(",", ""))
         rt = int(operands[1].replace("$", "").replace(",", ""))
@@ -207,7 +207,7 @@ if __name__ == "__main__":
     cpu = CPU()
 
     # 從檔案讀取指令
-    input_file = "C:\\Users\\user\\Documents\\GitHub\\MIPS\\inputs\\test1.txt"
+    input_file = "C:\\Users\\user\\Downloads\\SampleProject (1)\\SampleProject\\inputs\\test1.txt"
     with open(input_file, "r") as f:
         instructions = [parse_instruction(line.strip()) for line in f if line.strip() and not line.startswith("#")]
 
