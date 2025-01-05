@@ -79,11 +79,15 @@ class MIPS_Simulator:
 # 示例指令（格式：[opcode, rs, rt, rd, result]）
 # 两个 lw 指令加载数据，最后 add 指令将它们的值相加
 instructions = [
-    ["lw", 1, 0, 0, None],  # lw $t0, 0($t1) => 将内存地址0 + $t1的值加载到$t0
-    ["lw", 1, 4, 2, None],  # lw $t2, 4($t1) => 将内存地址4 + $t1的值加载到$t2
-    ["add", 0, 2, 3, None],  # add $t3, $t0, $t2 => 将$t0和$t2相加，结果存入$t3
+    ["lw", 0, 8, 2, None],  # lw $t0, 0($t1) => 将内存地址0 + $t1的值加载到$t0
+    ["lw", 0, 16, 3, None],  # lw $t2, 4($t1) => 将内存地址4 + $t1的值加载到$t2
+    ["add", 4, 5, 6, None],  # add $t3, $t0, $t2 => 将$t0和$t2相加，结果存入$t3
+    ["sw", 0, 24, 6, None],  # add $t3, $t0, $t2 => 将$t0和$t2相加，结果存入$t3
 ]
-
+#lw $2, 8($0)
+#lw $3, 16($0)
+#add $6, $4, $5
+#sw $6, 24($0)
 simulator = MIPS_Simulator(instructions)
 simulator.run()
 simulator.print_summary()

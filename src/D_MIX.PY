@@ -1,8 +1,9 @@
 class CPU:
     def __init__(self):
-        # 初始化暫存器、記憶體和流水線寄存器
-        self.registers = [0 for _ in range(32)]  # 暫存器初始值為 0
-        self.memory = [0 for _ in range(1024)]  # 記憶體初始值為 0
+        # 初始化暫存器和記憶體
+        self.registers = [1 for _ in range(32)]  # 所有暫存器初始值為 1
+        self.registers[0] = 0  # $0 暫存器永遠為 0
+        self.memory = [1 for _ in range(32)]  # 記憶體大小為 32 words，每個位置的初始值為 1
         self.pc = 0  # 程式計數器
         self.instructions = []  # 儲存解析後的指令
         self.result_log = []  # 執行過程記錄
