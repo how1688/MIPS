@@ -1,0 +1,47 @@
+
+## Each clocks
+Clock Cycle 1:
+lw IF
+
+Clock Cycle 2:
+lw ID
+lw IF
+
+Clock Cycle 3:
+lw EX RegDst=X ALUSrc=X Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+lw ID
+add IF
+
+Clock Cycle 4:
+lw MEM RegDst=X ALUSrc=X Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+lw EX RegDst=X ALUSrc=X Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+add ID
+sw IF
+
+Clock Cycle 5:
+lw WB RegDst=X ALUSrc=X Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+lw MEM RegDst=X ALUSrc=X Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+add EX RegDst=X ALUSrc=X Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+sw ID
+
+Clock Cycle 6:
+lw WB RegDst=X ALUSrc=X Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+add MEM RegDst=X ALUSrc=X Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+sw EX RegDst=X ALUSrc=X Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+
+Clock Cycle 7:
+add WB RegDst=X ALUSrc=X Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+sw MEM RegDst=X ALUSrc=X Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+
+Clock Cycle 8:
+sw WB RegDst=X ALUSrc=X Branch=X MemRead=X MemWrite=X RegWrite=X MemToReg=X
+
+
+## Final Result:
+Total Cycles: 8
+
+Final Register Values:
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+Final Memory Values:
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
