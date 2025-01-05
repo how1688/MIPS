@@ -75,7 +75,8 @@ class CPU:
                 self.EX_MEM["value"] = value
             elif self.EX_MEM["opcode"] == "sw":
                 address = self.EX_MEM["address"]
-                self.memory[address] = self.registers[self.EX_MEM["source1"]]
+                address = int(address/4)
+                self.memory[address] = self.registers[address]
 
             log_entry.append(f"{self.EX_MEM['opcode']} MEM Branch={self.EX_MEM['control'].get('Branch', 'X')} MemRead={self.EX_MEM['control'].get('MemRead', 'X')} MemWrite={self.EX_MEM['control'].get('MemWrite', 'X')} RegWrite={self.EX_MEM['control'].get('RegWrite', 'X')} MemToReg={self.EX_MEM['control'].get('MemToReg', 'X')}")
 
@@ -133,6 +134,7 @@ def parse_instruction(line):
     operands = [op.replace(",", "") for op in operands]
     if opcode in ["lw", "sw"]:
         # 解析 LW/SW 的操作數，例如 "8($0)"
+        # print(operands)
         offset, base = operands[1].split('(')
         offset = int(offset)
         base = int(base.replace("$", "").replace(")", ""))
