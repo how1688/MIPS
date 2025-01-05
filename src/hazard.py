@@ -6,17 +6,21 @@ class MIPS_Simulator:
         self.stalls = 0  # 记录暂停周期数
         self.pipeline = [None] * 5  # 模拟五个流水线阶段：IF, ID, EX, MEM, WB
 
-    def check_data_hazard(self, current, previous):
+    def check_data_hazard(self, current, previous, previous2):
         """检查是否有数据冒险"""
-        if current[1] == previous[1] or current[2] == previous[1]:
+        if previous and (current[1] == previous[1] or current[2] == previous[1]):
+            return True
+        if previous2 and (current[1] == previous2[1] or current[2] == previous2[1]):
             return True
         return False
 
     def handle_stalling(self, current_index):
         """处理数据冒险时的暂停"""
         # 确保 current_index 不超出范围
-        if current_index < len(self.instructions) and current_index > 0:
-            if self.check_data_hazard(self.instructions[current_index], self.instructions[current_index - 1]):
+        if current_index < len(self.instructions) and current_index > 1:
+            # 检查前一条和前前一条指令是否存在数据冒险
+            if self.check_data_hazard(self.instructions[current_index], self.instructions[current_index - 1], 
+                                      self.instructions[current_index - 2]):
                 self.stalls += 1
                 return True
         return False
@@ -79,15 +83,11 @@ class MIPS_Simulator:
 # 示例指令（格式：[opcode, rs, rt, rd, result]）
 # 两个 lw 指令加载数据，最后 add 指令将它们的值相加
 instructions = [
-    ["lw", 0, 8, 2, None],  # lw $t0, 0($t1) => 将内存地址0 + $t1的值加载到$t0
-    ["lw", 0, 16, 3, None],  # lw $t2, 4($t1) => 将内存地址4 + $t1的值加载到$t2
-    ["add", 4, 5, 6, None],  # add $t3, $t0, $t2 => 将$t0和$t2相加，结果存入$t3
-    ["sw", 0, 24, 6, None],  # add $t3, $t0, $t2 => 将$t0和$t2相加，结果存入$t3
+    ["lw", 1, 0, 0, None],  # lw $t0, 0($t1) => 将内存地址0 + $t1的值加载到$t0
+    ["lw", 1, 4, 2, None],  # lw $t2, 4($t1) => 将内存地址4 + $t1的值加载到$t2
+    ["add", 0, 2, 3, None],  # add $t3, $t0, $t2 => 将$t0和$t2相加，结果存入$t3
 ]
-#lw $2, 8($0)
-#lw $3, 16($0)
-#add $6, $4, $5
-#sw $6, 24($0)
+
 simulator = MIPS_Simulator(instructions)
 simulator.run()
 simulator.print_summary()
