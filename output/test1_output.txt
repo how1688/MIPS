@@ -1,0 +1,38 @@
+# Execution Log
+Clock Cycle 1:
+lw: IF
+Clock Cycle 2:
+lw: ID
+lw: IF
+Clock Cycle 3:
+lw: EX RegDst=0 ALUSrc=1 Branch=X MemRead=1 MemWrite=0 RegWrite=1 MemToReg=1
+lw: ID
+add: IF
+Clock Cycle 4:
+lw: MEM Branch=X MemRead=1 MemWrite=0 RegWrite=1 MemToReg=1
+lw: EX RegDst=0 ALUSrc=1 Branch=X MemRead=1 MemWrite=0 RegWrite=1 MemToReg=1
+add: ID
+sw: IF
+Clock Cycle 5:
+lw: WB RegWrite=1 MemToReg=1
+lw: MEM Branch=X MemRead=1 MemWrite=0 RegWrite=1 MemToReg=1
+add: EX RegDst=1 ALUSrc=0 Branch=X MemRead=0 MemWrite=0 RegWrite=1 MemToReg=0
+sw: ID
+Clock Cycle 6:
+lw: WB RegWrite=1 MemToReg=1
+add: MEM Branch=X MemRead=0 MemWrite=0 RegWrite=1 MemToReg=0
+sw: EX RegDst=X ALUSrc=1 Branch=X MemRead=0 MemWrite=1 RegWrite=0 MemToReg=X
+Clock Cycle 7:
+add: WB RegWrite=1 MemToReg=0
+sw: MEM Branch=X MemRead=0 MemWrite=1 RegWrite=0 MemToReg=X
+Clock Cycle 8:
+sw: WB RegWrite=0 MemToReg=X
+
+## Final Results:
+Total Cycles: 8
+
+Final Register Values:
+0 1 1 1 1 1 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+
+Final Memory Values:
+1 1 1 1 1 1 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
