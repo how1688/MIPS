@@ -1,0 +1,70 @@
+# Execution Log
+Clock Cycle 1:
+add: IF
+Clock Cycle 2:
+add: ID
+add: IF
+Clock Cycle 3:
+add: EX RegDst=1 ALUSrc=0 Branch=X MemRead=0 MemWrite=0 RegWrite=1 MemToReg=0
+add: ID
+sub: IF
+Clock Cycle 4:
+add: MEM Branch=X MemRead=0 MemWrite=0 RegWrite=1 MemToReg=0
+add: EX RegDst=1 ALUSrc=0 Branch=X MemRead=0 MemWrite=0 RegWrite=1 MemToReg=0
+sub: ID
+beq: IF
+Clock Cycle 5:
+add: WB RegWrite=1 MemToReg=0
+add: MEM Branch=X MemRead=0 MemWrite=0 RegWrite=1 MemToReg=0
+sub: EX RegDst=1 ALUSrc=0 Branch=X MemRead=0 MemWrite=0 RegWrite=1 MemToReg=0
+beq: ID
+add: IF
+Clock Cycle 6:
+add: WB RegWrite=1 MemToReg=0
+sub: MEM Branch=X MemRead=0 MemWrite=0 RegWrite=1 MemToReg=0
+beq: ID
+add: IF
+Clock Cycle 7:
+sub: WB RegWrite=1 MemToReg=0
+beq: EX RegDst=X ALUSrc=0 Branch=1 MemRead=0 MemWrite=0 RegWrite=0 MemToReg=X
+sub: IF
+Clock Cycle 8:
+beq: MEM Branch=1 MemRead=0 MemWrite=0 RegWrite=0 MemToReg=X
+sub: ID
+beq: IF
+Clock Cycle 9:
+beq: WB RegWrite=0 MemToReg=X
+sub: EX RegDst=1 ALUSrc=0 Branch=X MemRead=0 MemWrite=0 RegWrite=1 MemToReg=0
+beq: ID
+add: IF
+Clock Cycle 10:
+sub: MEM Branch=X MemRead=0 MemWrite=0 RegWrite=1 MemToReg=0
+beq: ID
+add: IF
+Clock Cycle 11:
+sub: WB RegWrite=1 MemToReg=0
+beq: EX RegDst=X ALUSrc=0 Branch=1 MemRead=0 MemWrite=0 RegWrite=0 MemToReg=X
+add: ID
+sw: IF
+Clock Cycle 12:
+beq: MEM Branch=1 MemRead=0 MemWrite=0 RegWrite=0 MemToReg=X
+add: EX RegDst=1 ALUSrc=0 Branch=X MemRead=0 MemWrite=0 RegWrite=1 MemToReg=0
+sw: ID
+Clock Cycle 13:
+beq: WB RegWrite=0 MemToReg=X
+add: MEM Branch=X MemRead=0 MemWrite=0 RegWrite=1 MemToReg=0
+sw: EX RegDst=X ALUSrc=1 Branch=X MemRead=0 MemWrite=1 RegWrite=0 MemToReg=X
+Clock Cycle 14:
+add: WB RegWrite=1 MemToReg=0
+sw: MEM Branch=X MemRead=0 MemWrite=1 RegWrite=0 MemToReg=X
+Clock Cycle 15:
+sw: WB RegWrite=0 MemToReg=X
+
+## Final Results:
+Total Cycles: 15
+
+Final Register Values:
+0 2 1 1 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+
+Final Memory Values:
+1 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
